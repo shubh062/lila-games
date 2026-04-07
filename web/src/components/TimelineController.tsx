@@ -18,19 +18,19 @@ export default function TimelineController({
   const animationRef = useRef<number | null>(null);
   const lastUpdateRef = useRef<number>(0);
 
-  // SAFE ACCESSORS
-  const minTime = matchData?.events?.[0]?.ts || 0;
-  const maxTime = matchData?.events ? matchData.events[matchData.events.length - 1]?.ts || 100 : 100;
+  const minTime = matchData?.events[0]?.ts || 0;
+  const maxTime = matchData?.events[matchData.events.length - 1]?.ts || 100;
   
-  const formatTime = (ts: number) => {
-    const totalSecs = Math.max(0, Math.floor(ts - minTime));
+  // Convert ms offset to string mm:ss
+  const formatTime = (ms: number) => {
+    const totalSecs = Math.max(0, Math.floor((ms - minTime) / 1000));
     const m = Math.floor(totalSecs / 60);
     const s = totalSecs % 60;
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
   useEffect(() => {
-    if (!isPlaying || !matchData) {
+    if (!isPlaying) {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
       return;
     }
@@ -41,8 +41,8 @@ export default function TimelineController({
       lastUpdateRef.current = timestamp;
 
       setCurrentTime((prev) => {
-        // Safe match speed (approx 1x real time for 1000ms wall = 1s match)
-        const nextTime = prev + (deltaMs * speedMultiplier * 10); 
+        // Assume baseline 1x speed is realistic time. E.g. x times actual delta
+        const nextTime = prev + (deltaMs * speedMultiplier * 10); // 10x base speed for UX
         if (nextTime >= maxTime) {
           setIsPlaying(false);
           return maxTime;
@@ -59,19 +59,21 @@ export default function TimelineController({
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [isPlaying, speedMultiplier, maxTime, setCurrentTime, matchData]);
+  }, [isPlaying, speedMultiplier, maxTime, setCurrentTime]);
 
+  // Reset when match changes
   useEffect(() => {
     setIsPlaying(false);
   }, [matchData]);
 
-  if (!matchData) return <div className="h-20 shrink-0 bg-zinc-950/80 border-t border-zinc-800" />;
+  if (!matchData) return <div className="h-16 shrink-0 bg-zinc-950 border-t border-zinc-800" />;
 
   const progressPct = Math.max(0, Math.min(100, ((currentTime - minTime) / (maxTime - minTime)) * 100)) || 0;
 
   return (
     <div className="h-20 shrink-0 bg-zinc-950/80 backdrop-blur-md border-t border-zinc-800 flex flex-col justify-center px-6 fixed bottom-0 left-80 right-0 z-10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
       
+      {/* Slider */}
       <div className="relative w-full h-1.5 bg-zinc-800 rounded-full mb-3 group cursor-pointer"
            onClick={(e) => {
              const rect = e.currentTarget.getBoundingClientRect();
@@ -79,40 +81,52 @@ export default function TimelineController({
              setCurrentTime(minTime + Math.floor(pct * (maxTime - minTime)));
            }}>
         <div 
-          className="absolute left-0 top-0 h-full bg-gradient-to-r from-purple-500 to-cyan-400 rounded-full"
+          className="absolute left-0 top-0 h-full bg-gradient-to-r from-purple-500 to-cyan-400 rounded-full shadow-[0_0_10px_rgba(34,211,238,0.5)] pointer-events-none transition-all duration-75"
           style={{ width: `${progressPct}%` }}
         />
         <div 
-          className="absolute top-1/2 -mt-2 w-4 h-4 bg-white rounded-full border-2 border-cyan-400 group-hover:scale-125 transition-transform"
+          className="absolute top-1/2 -mt-2 w-4 h-4 bg-white rounded-full shadow border-2 border-cyan-400 group-hover:scale-125 transition-transform opacity-0 group-hover:opacity-100"
           style={{ left: `calc(${progressPct}% - 8px)` }}
         />
       </div>
 
+      {/* Controls */}
       <div className="flex items-center justify-between text-zinc-400 text-xs">
-        <div className="w-20 font-mono text-zinc-300">{formatTime(currentTime)}</div>
+        <div className="w-20 font-mono text-zinc-300">
+          {formatTime(currentTime)}
+        </div>
         
         <div className="flex items-center gap-4">
-          <button onClick={() => setCurrentTime(minTime)} className="hover:text-white"><SkipBack className="w-4 h-4" /></button>
+          <button 
+            onClick={() => setCurrentTime(minTime)}
+            className="hover:text-white transition-colors"
+          >
+            <SkipBack className="fill-current w-4 h-4" />
+          </button>
+          
           <button 
             onClick={() => setIsPlaying(!isPlaying)}
-            className="w-10 h-10 rounded-full bg-zinc-100 text-zinc-900 flex items-center justify-center hover:scale-105 transition-all"
+            className="w-10 h-10 rounded-full bg-zinc-100 text-zinc-900 flex items-center justify-center hover:bg-white hover:scale-105 transition-all shadow-[0_0_15px_rgba(255,255,255,0.2)]"
           >
             {isPlaying ? <Pause className="fill-current w-5 h-5" /> : <Play className="fill-current w-5 h-5 ml-1" />}
           </button>
+
           <button 
             onClick={() => {
               const speeds = [1, 2, 5, 10];
               const nextSpeed = speeds[(speeds.indexOf(speedMultiplier) + 1) % speeds.length];
               setSpeedMultiplier(nextSpeed);
             }}
-            className="flex items-center gap-1 hover:text-white transition-colors"
+            className="flex items-center gap-1 hover:text-white transition-colors font-medium"
           >
-            <FastForward className="w-4 h-4" />
-            <span>{speedMultiplier}x</span>
+            <FastForward className="fill-current w-4 h-4" />
+            <span className="w-4">{speedMultiplier}x</span>
           </button>
         </div>
 
-        <div className="w-20 text-right font-mono text-zinc-500">{formatTime(maxTime)}</div>
+        <div className="w-20 text-right font-mono text-zinc-500">
+          {formatTime(maxTime)}
+        </div>
       </div>
     </div>
   );

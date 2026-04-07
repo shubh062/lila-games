@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import React from "react";
 import { MatchIndex } from "./Dashboard";
 import { Map, Calendar, Users, Cpu, Activity, Flame, Eye, EyeOff, Package, Skull, Crosshair } from "lucide-react";
 

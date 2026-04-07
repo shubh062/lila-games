@@ -20,11 +20,6 @@ export default function MapViewer({
   const minimapUrl = `/minimaps/${mapId}_Minimap.${mapId === 'Lockdown' ? 'jpg' : 'png'}`;
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const formatTimestamp = (ts: number) => {
-    const date = new Date(ts);
-    return date.toLocaleTimeString([], { hour12: false, minute: '2-digit', second: '2-digit' });
-  };
-
   // Group paths by player
   const paths = useMemo(() => {
     const playerPaths: Record<string, { isHuman: boolean, points: {x:number, y:number}[] }> = {};
@@ -39,23 +34,27 @@ export default function MapViewer({
     return playerPaths;
   }, [events]);
 
+  // Extract distinct events to render up to the current visible timeline
   const discreteEvents = useMemo(() => {
     return events.filter(e => e.type !== 'Position' && e.type !== 'BotPosition');
   }, [events]);
 
-  // Heatmap Logic
+  // Heatmap Drawing Logic
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (!showHeatmap) return;
 
     const combatEvents = allEvents.filter(e => e.type.includes("Kill") || e.type.includes("Killed"));
+    
     combatEvents.forEach(evt => {
       const isKill = evt.type.includes("Kill") && !evt.type.includes("Killed");
       const gradient = ctx.createRadialGradient(evt.px, evt.py, 2, evt.px, evt.py, 20);
+      
       if (isKill) {
         gradient.addColorStop(0, 'rgba(34, 197, 94, 0.4)');
         gradient.addColorStop(1, 'rgba(34, 197, 94, 0)');
@@ -63,6 +62,7 @@ export default function MapViewer({
         gradient.addColorStop(0, 'rgba(239, 68, 68, 0.4)');
         gradient.addColorStop(1, 'rgba(239, 68, 68, 0)');
       }
+
       ctx.fillStyle = gradient;
       ctx.fillRect(evt.px - 20, evt.py - 20, 40, 40);
     });
@@ -72,11 +72,12 @@ export default function MapViewer({
     <div className="flex-1 relative overflow-hidden bg-black flex items-center justify-center p-4">
       {isLoading && (
         <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center">
-          <div className="w-12 h-12 border-4 border-zinc-800 border-t-cyan-400 rounded-full animate-spin" />
+          <div className="w-12 h-12 border-4 border-zinc-800 border-t-cyan-400 rounded-full animate-spin"></div>
         </div>
       )}
 
-      <div className="relative w-full max-w-[80vh] aspect-square rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(34,211,238,0.05)] border border-white/5">
+      {/* The main map container */}
+      <div className="relative w-full max-w-[80vh] aspect-square rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(34,211,238,0.05)] border border-white/5 ring-1 ring-white/10">
         <img 
           src={minimapUrl} 
           alt={mapId}
@@ -84,44 +85,66 @@ export default function MapViewer({
           style={{ imageRendering: 'pixelated' }}
         />
 
+        {/* Heatmap Canvas Layer */}
         <canvas
           ref={canvasRef}
           width={1024}
           height={1024}
-          className="absolute inset-0 w-full h-full pointer-events-none opacity-80"
-          style={{ filter: 'blur(8px) saturate(1.5)', visibility: showHeatmap ? 'visible' : 'hidden' }}
+          className="absolute inset-0 w-full h-full pointer-events-none opacity-80 transition-opacity duration-500"
+          style={{ 
+            filter: 'blur(8px) saturate(1.5)',
+            visibility: showHeatmap ? 'visible' : 'hidden'
+          }}
         />
 
-        <svg viewBox="0 0 1024 1024" className="absolute inset-0 w-full h-full pointer-events-none drop-shadow-md z-20">
+        {/* SVG Drawing Layer */}
+        <svg 
+          viewBox="0 0 1024 1024" 
+          className="absolute inset-0 w-full h-full pointer-events-none drop-shadow-md"
+        >
+          {/* Paths */}
+          {Object.entries(paths).map(([playerId, data]) => {
+            const pointsStr = data.points.map(p => `${p.x},${p.y}`).join(' ');
+            return (
+              <polyline
+                key={playerId}
+                points={pointsStr}
+                fill="none"
+                stroke={data.isHuman ? "rgba(59, 130, 246, 0.6)" : "rgba(156, 163, 175, 0.3)"}
+                strokeWidth={data.isHuman ? 3 : 1.5}
+                strokeDasharray={data.isHuman ? "none" : "4 4"}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={`pointer-events-auto cursor-help ${data.isHuman ? "drop-shadow-[0_0_2px_#3b82f6]" : ""}`}
+              >
+                <title>{`Player: ${playerId}\nType: ${data.isHuman ? 'Human' : 'Bot'}\nPoints: ${data.points.length}`}</title>
+              </polyline>
+            );
+          })}
+
+          {/* Current Player Heads */}
           {Object.entries(paths).map(([playerId, data]) => {
             if (data.points.length === 0) return null;
-            const pointsStr = data.points.map(p => `${p.x},${p.y}`).join(' ');
             const last = data.points[data.points.length - 1];
             return (
-              <g key={playerId}>
-                <polyline
-                  points={pointsStr}
-                  fill="none"
-                  stroke={data.isHuman ? "rgba(59, 130, 246, 0.6)" : "rgba(156, 163, 175, 0.3)"}
-                  strokeWidth={data.isHuman ? 3 : 1.5}
-                  strokeDasharray={data.isHuman ? "none" : "4 4"}
-                />
-                <circle
-                  cx={last.x}
-                  cy={last.y}
-                  r={data.isHuman ? 5 : 3}
-                  fill={data.isHuman ? "#60a5fa" : "#9ca3af"}
-                  className={data.isHuman ? "drop-shadow-[0_0_6px_#60a5fa]" : ""}
-                />
-              </g>
+              <circle
+                key={`head-${playerId}`}
+                cx={last.x}
+                cy={last.y}
+                r={data.isHuman ? 5 : 3}
+                fill={data.isHuman ? "#60a5fa" : "#d1d5db"}
+                className={data.isHuman ? "drop-shadow-[0_0_6px_#60a5fa]" : ""}
+              />
             );
           })}
         </svg>
 
-        <div className="absolute inset-0 w-full h-full pointer-events-none z-30">
+        {/* HTML Discrete Events Layer (Icons) */}
+        <div className="absolute inset-0 w-full h-full pointer-events-none">
           {discreteEvents.map((evt, idx) => {
             const x = `${(evt.px / 1024) * 100}%`;
             const y = `${(evt.py / 1024) * 100}%`;
+            
             let Icon = null;
             let colorCls = "";
             let size = 16;
@@ -141,12 +164,13 @@ export default function MapViewer({
             }
 
             if (!Icon) return null;
+
             return (
               <div 
-                key={`${evt.player}-${evt.ts}-${evt.type}`}
-                className={`absolute transform -translate-x-1/2 -translate-y-1/2 ${colorCls} pointer-events-auto cursor-help`}
+                key={`${evt.type}-${idx}`}
+                className={`absolute transform -translate-x-1/2 -translate-y-1/2 ${colorCls} animate-in fade-in zoom-in duration-300`}
                 style={{ left: x, top: y }}
-                title={`${evt.type} by ${evt.player} at ${formatTimestamp(evt.ts)}`}
+                title={`${evt.type} by ${evt.player} at ${evt.ts}ms`}
               >
                 {Icon}
               </div>

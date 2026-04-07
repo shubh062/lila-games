@@ -5,30 +5,33 @@ import Sidebar from "./Sidebar";
 import MapViewer from "./MapViewer";
 import TimelineController from "./TimelineController";
 
-export interface PlayerEvent {
-  player: string;
-  is_human: boolean;
-  type: string;
-  ts: number;
-  px: number;
-  py: number;
-}
-
-export interface MatchIndex {
+export type MatchIndex = {
   match_id: string;
   map_id: string;
   date: string;
   humans_count: number;
   bots_count: number;
   events_count: number;
-}
+};
 
-export interface MatchData {
+export type PlayerEvent = {
+  player: string;
+  is_human: boolean;
+  type: string;
+  ts: number;
+  px: number;
+  py: number;
+};
+
+export type MatchData = {
   match_id: string;
   map_id: string;
   date: string;
+  humans_count: number;
+  bots_count: number;
+  events_count: number;
   events: PlayerEvent[];
-}
+};
 
 export default function Dashboard() {
   const [index, setIndex] = useState<MatchIndex[]>([]);
@@ -41,53 +44,59 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Premium Visual States
-  const [showHeatmap, setShowHeatmap] = useState(true);
-  const [visibleEventTypes, setVisibleEventTypes] = useState<Set<string>>(new Set(['Kill', 'Killed', 'Loot']));
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [visibleEventTypes, setVisibleEventTypes] = useState<Set<string>>(new Set(["Kill", "Killed", "Loot", "KilledByStorm"]));
 
   useEffect(() => {
     fetch("/data/matches_index.json")
-      .then(res => res.json())
-      .then(data => {
-        // Safe parsing: handles if data is the array directly or wrapped in {matches: []}
-        const matches = Array.isArray(data) ? data : (data.matches || []);
-        setIndex(matches);
-        const filtered = matches.filter((m: any) => m.map_id === selectedMap);
-        if (filtered.length > 0) {
-          setSelectedMatchId(filtered[0].match_id);
+      .then((res) => res.json())
+      .then((data) => {
+        setIndex(data);
+        // Autoselect a match if none selected
+        if (!selectedMatchId && data.length > 0) {
+          const defaultMatch = data.find((d: MatchIndex) => d.map_id === "AmbroseValley") || data[0];
+          setSelectedMatchId(defaultMatch.match_id);
+          setSelectedMap(defaultMatch.map_id);
+          setSelectedDate(defaultMatch.date);
         }
-      });
-  }, [selectedMap]);
+      })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     if (!selectedMatchId) return;
     setIsLoading(true);
     fetch(`/data/${selectedMatchId}.json`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         setMatchData(data);
         setIsLoading(false);
+        // Reset timeline
         if (data.events && data.events.length > 0) {
           setCurrentTime(data.events[0].ts);
         }
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         setIsLoading(false);
       });
   }, [selectedMatchId]);
 
+  // Derived visible events based on currentTime and filters
   const visibleEvents = useMemo(() => {
     if (!matchData) return [];
-    
-    // Original trail logic (120 seconds) - this was the state before Gold Polish
-    const TRAIL_SEC = 120; 
+    // Show events from start up to current time (or within a trailing window?)
+    // A trail of 120 seconds looks good
+    const TRAIL_MS = 120000;
     return matchData.events.filter(e => {
-      const isTimeValid = e.ts <= currentTime && e.ts >= currentTime - TRAIL_SEC;
+      const isTimeValid = e.ts <= currentTime && e.ts >= currentTime - TRAIL_MS;
       if (e.type === 'Position' || e.type === 'BotPosition') return isTimeValid;
       
+      // For discrete events, check the visible types filter
+      // Normalize type name for filter check
       let normalizedType = e.type;
       if (e.type.includes("Kill") && !e.type.includes("Killed")) normalizedType = "Kill";
-      if (e.type.includes("Killed")) normalizedType = "Killed";
+      if (e.type.includes("Killed") && !e.type.includes("Storm")) normalizedType = "Killed";
 
       return isTimeValid && visibleEventTypes.has(normalizedType);
     });
@@ -108,8 +117,7 @@ export default function Dashboard() {
         visibleEventTypes={visibleEventTypes}
         setVisibleEventTypes={setVisibleEventTypes}
       />
-      
-      <div className="flex-1 flex flex-col relative bg-zinc-950">
+      <div className="flex-1 flex flex-col relative bg-zinc-900 border-l border-zinc-800">
         <MapViewer 
           mapId={selectedMap} 
           events={visibleEvents} 
