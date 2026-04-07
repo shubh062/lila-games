@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #09090b; /* Very dark zinc */
+    --foreground: #fafafa;
+    
+    --lila-primary: #a855f7; /* Purple for LILA */
+    --lila-primary-glow: rgba(168, 85, 247, 0.5);
+    --lila-accent: #22d3ee; /* Cyan/Neon blue */
+    
+    /* Event Colors */
+    --color-human: #3b82f6; /* Blue for human movement */
+    --color-bot: #9ca3af;   /* Gray for bot movement */
+    --color-kill: #22c55e;  /* Green for outgoing kill */
+    --color-death: #ef4444; /* Red for death */
+    --color-loot: #f59e0b;  /* Amber for loot */
+    --color-storm: #d946ef; /* Fuchsia for storm death */
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+/* Custom scrollbar for sidebar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
