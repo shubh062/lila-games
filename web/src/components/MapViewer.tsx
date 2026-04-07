@@ -5,16 +5,16 @@ import { PlayerEvent } from "./Dashboard";
 import { InsightMode, MapInsights } from "./MapInsightsPanel";
 import { Skull, Crosshair, Package, Zap } from "lucide-react";
 
-export default function MapViewer({ 
-  mapId, 
-  events, 
+export default function MapViewer({
+  mapId,
+  events,
   allEvents,
   isLoading,
   showHeatmap,
   entityVisibility,
   insightMode,
   mapInsights
-}: { 
+}: {
   mapId: string;
   events: PlayerEvent[];
   allEvents: PlayerEvent[];
@@ -186,15 +186,15 @@ export default function MapViewer({
   }, [insightMode]);
 
   return (
-    <div className="flex-1 relative overflow-hidden bg-black flex items-center justify-center p-4">
+    <div className="flex-1 relative overflow-hidden bg-black flex items-center justify-center p-2">
       {isLoading && (
         <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center">
           <div className="w-12 h-12 border-4 border-zinc-800 border-t-cyan-400 rounded-full animate-spin"></div>
         </div>
       )}
 
-      {/* Main map container */}
-      <div className="relative w-full max-w-[80vh] aspect-square rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(34,211,238,0.05)] border border-white/5 ring-1 ring-white/10">
+      {/* Main map container — fill available height, maintain square */}
+      <div className="relative h-full aspect-square max-w-full rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(34,211,238,0.05)] border border-white/5 ring-1 ring-white/10">
         <img
           src={minimapUrl}
           alt={mapId}
@@ -370,20 +370,19 @@ export default function MapViewer({
         {/* Insight Mode Active Banner */}
         {insightMode && mapInsights && (
           <div className="absolute top-8 left-0 right-0 bg-zinc-950/70 backdrop-blur-sm px-3 py-1 flex items-center justify-center gap-2 text-[10px] font-mono z-10 border-b border-white/5">
-            <span className={`uppercase font-bold tracking-wider ${
-              insightMode === 'kills' ? 'text-green-400' :
-              insightMode === 'deaths' ? 'text-red-400' :
-              insightMode === 'loot' ? 'text-amber-400' :
-              insightMode === 'traffic' ? 'text-cyan-400' :
-              'text-fuchsia-400'
-            }`}>
+            <span className={`uppercase font-bold tracking-wider ${insightMode === 'kills' ? 'text-green-400' :
+                insightMode === 'deaths' ? 'text-red-400' :
+                  insightMode === 'loot' ? 'text-amber-400' :
+                    insightMode === 'traffic' ? 'text-cyan-400' :
+                      'text-fuchsia-400'
+              }`}>
               ▲ Aggregate: {insightMode} — {mapInsights.total_matches} matches
             </span>
           </div>
         )}
 
         {/* ─── Legend Panel (bottom-left overlay) ─── */}
-        <div className="absolute bottom-2 left-2 z-10 bg-zinc-950/85 backdrop-blur-sm border border-white/10 rounded-lg px-2.5 py-2 space-y-1">
+        <div className="absolute bottom-20 right-2 z-10 bg-zinc-950/85 backdrop-blur-sm border border-white/10 rounded-lg px-2.5 py-2 space-y-1">
           <p className="text-[8px] text-zinc-500 uppercase font-bold tracking-widest mb-1.5">Legend</p>
 
           {/* Path types */}
