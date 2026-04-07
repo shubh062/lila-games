@@ -43,16 +43,19 @@ export default function Dashboard() {
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Premium Visual States
+  // Visual filter states
   const [showHeatmap, setShowHeatmap] = useState(false);
-  const [visibleEventTypes, setVisibleEventTypes] = useState<Set<string>>(new Set(["Kill", "Killed", "Loot", "KilledByStorm"]));
+  const [visibleEventTypes, setVisibleEventTypes] = useState<Set<string>>(
+    new Set(["Kill", "Killed", "Loot", "KilledByStorm"])
+  );
+  // Entity path visibility: all | humans | bots
+  const [entityVisibility, setEntityVisibility] = useState<'all' | 'humans' | 'bots'>('all');
 
   useEffect(() => {
     fetch("/data/matches_index.json")
       .then((res) => res.json())
       .then((data) => {
         setIndex(data);
-        // Autoselect a match if none selected
         if (!selectedMatchId && data.length > 0) {
           const defaultMatch = data.find((d: MatchIndex) => d.map_id === "AmbroseValley") || data[0];
           setSelectedMatchId(defaultMatch.match_id);
@@ -71,7 +74,6 @@ export default function Dashboard() {
       .then((data) => {
         setMatchData(data);
         setIsLoading(false);
-        // Reset timeline
         if (data.events && data.events.length > 0) {
           setCurrentTime(data.events[0].ts);
         }
@@ -82,21 +84,20 @@ export default function Dashboard() {
       });
   }, [selectedMatchId]);
 
-  // Derived visible events based on currentTime and filters
+  // Derived visible events based on timeline + event type filters
   const visibleEvents = useMemo(() => {
     if (!matchData) return [];
-    // Show events from start up to current time (or within a trailing window?)
-    // A trail of 120 seconds looks good
     const TRAIL_MS = 120000;
     return matchData.events.filter(e => {
       const isTimeValid = e.ts <= currentTime && e.ts >= currentTime - TRAIL_MS;
+      // Position events always pass through (filtered by entityVisibility in MapViewer)
       if (e.type === 'Position' || e.type === 'BotPosition') return isTimeValid;
       
-      // For discrete events, check the visible types filter
-      // Normalize type name for filter check
+      // Normalize discrete event type for the filter set
       let normalizedType = e.type;
       if (e.type.includes("Kill") && !e.type.includes("Killed")) normalizedType = "Kill";
-      if (e.type.includes("Killed")) normalizedType = "Killed";
+      if (e.type.includes("Killed") && !e.type.includes("Storm")) normalizedType = "Killed";
+      // Note: "KilledByStorm" stays as "KilledByStorm" for independent toggling
 
       return isTimeValid && visibleEventTypes.has(normalizedType);
     });
@@ -116,6 +117,8 @@ export default function Dashboard() {
         setShowHeatmap={setShowHeatmap}
         visibleEventTypes={visibleEventTypes}
         setVisibleEventTypes={setVisibleEventTypes}
+        entityVisibility={entityVisibility}
+        setEntityVisibility={setEntityVisibility}
       />
       <div className="flex-1 flex flex-col relative bg-zinc-900 border-l border-zinc-800">
         <MapViewer 
@@ -124,6 +127,7 @@ export default function Dashboard() {
           allEvents={matchData?.events || []}
           isLoading={isLoading} 
           showHeatmap={showHeatmap}
+          entityVisibility={entityVisibility}
         />
         <TimelineController 
           matchData={matchData} 
