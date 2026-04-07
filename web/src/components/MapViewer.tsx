@@ -30,8 +30,8 @@ export default function MapViewer({
     for (const e of allEvents) {
       if (e.type === 'Position') humans.add(e.player);
       if (e.type === 'BotPosition') bots.add(e.player);
-      if (e.type.includes("Kill") && !e.type.includes("Killed")) kills++;
-      if (e.type.includes("Killed") && !e.type.includes("Storm")) deaths++;
+      if (e.type === 'BotKill' || e.type === 'Kill') kills++;
+      if (e.type === 'BotKilled' || e.type === 'Killed') deaths++;
       if (e.type === "KilledByStorm") stormDeaths++;
       if (e.type === "Loot") loot++;
     }
@@ -78,12 +78,12 @@ export default function MapViewer({
     if (!showHeatmap) return;
 
     const combatEvents = allEvents.filter(e =>
-      (e.type.includes("Kill") || e.type.includes("Killed")) &&
+      (e.type === 'BotKill' || e.type === 'Kill' || e.type === 'BotKilled' || e.type === 'Killed') &&
       !(e.px === 0 && e.py === 0)
     );
 
     combatEvents.forEach(evt => {
-      const isKill = evt.type.includes("Kill") && !evt.type.includes("Killed");
+      const isKill = evt.type === 'BotKill' || evt.type === 'Kill';
       const gradient = ctx.createRadialGradient(evt.px, evt.py, 2, evt.px, evt.py, 20);
       if (isKill) {
         gradient.addColorStop(0, 'rgba(34, 197, 94, 0.4)');
@@ -186,16 +186,20 @@ export default function MapViewer({
             let colorCls = "";
             const size = 16;
 
-            if (evt.type.includes("Kill") && !evt.type.includes("Killed")) {
+            // BotKill = where the killing shot originated (killer's position) → green crosshair
+            // Kill = rare human-on-human kill → green crosshair
+            if (evt.type === 'BotKill' || evt.type === 'Kill') {
               Icon = <Crosshair size={size} />;
               colorCls = "text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]";
-            } else if (evt.type.includes("Killed") && !evt.type.includes("Storm")) {
+            // BotKilled = where the bot fell (victim's position) → red skull
+            // Killed = rare human-on-human death → red skull
+            } else if (evt.type === 'BotKilled' || evt.type === 'Killed') {
               Icon = <Skull size={size} />;
               colorCls = "text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]";
-            } else if (evt.type === "Loot") {
+            } else if (evt.type === 'Loot') {
               Icon = <Package size={14} />;
               colorCls = "text-amber-400 drop-shadow-[0_0_5px_rgba(251,191,36,0.6)]";
-            } else if (evt.type === "KilledByStorm") {
+            } else if (evt.type === 'KilledByStorm') {
               Icon = <Zap size={size} />;
               colorCls = "text-fuchsia-500 drop-shadow-[0_0_10px_rgba(217,70,239,1)]";
             }

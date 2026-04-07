@@ -93,11 +93,15 @@ export default function Dashboard() {
       // Position events always pass through (filtered by entityVisibility in MapViewer)
       if (e.type === 'Position' || e.type === 'BotPosition') return isTimeValid;
       
-      // Normalize discrete event type for the filter set
+      // Map real event types to filter category IDs
+      // BotKill = shooter's position (green crosshair = a kill happened)
+      // BotKilled = victim's position (red skull = where a bot fell)
+      // Kill / Killed = rare human-on-human events
+      // KilledByStorm = independent storm category
       let normalizedType = e.type;
-      if (e.type.includes("Kill") && !e.type.includes("Killed")) normalizedType = "Kill";
-      if (e.type.includes("Killed") && !e.type.includes("Storm")) normalizedType = "Killed";
-      // Note: "KilledByStorm" stays as "KilledByStorm" for independent toggling
+      if (e.type === 'BotKill' || e.type === 'Kill') normalizedType = 'Kill';
+      else if (e.type === 'BotKilled' || e.type === 'Killed') normalizedType = 'Killed';
+      // KilledByStorm and Loot stay as-is
 
       return isTimeValid && visibleEventTypes.has(normalizedType);
     });
