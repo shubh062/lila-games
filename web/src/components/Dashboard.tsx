@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import Sidebar from "./Sidebar";
 import MapViewer from "./MapViewer";
 import TimelineController from "./TimelineController";
+import MapInsightsPanel, { InsightMode, MapInsights } from "./MapInsightsPanel";
 
 export type MatchIndex = {
   match_id: string;
@@ -51,6 +52,11 @@ export default function Dashboard() {
   // Entity path visibility: all | humans | bots
   const [entityVisibility, setEntityVisibility] = useState<'all' | 'humans' | 'bots'>('all');
 
+  // Map Insights state
+  const [mapInsights, setMapInsights] = useState<MapInsights | null>(null);
+  const [activeInsightMode, setActiveInsightMode] = useState<InsightMode>(null);
+
+  // Load match index
   useEffect(() => {
     fetch("/data/matches_index.json")
       .then((res) => res.json())
@@ -66,6 +72,7 @@ export default function Dashboard() {
       .catch(console.error);
   }, []);
 
+  // Load match data when selection changes
   useEffect(() => {
     if (!selectedMatchId) return;
     setIsLoading(true);
@@ -83,6 +90,19 @@ export default function Dashboard() {
         setIsLoading(false);
       });
   }, [selectedMatchId]);
+
+  // Load map insights when selected map changes
+  useEffect(() => {
+    fetch(`/data/map_insights_${selectedMap}.json`)
+      .then((res) => res.json())
+      .then((data) => setMapInsights(data))
+      .catch((err) => {
+        console.error("Failed to load map insights:", err);
+        setMapInsights(null);
+      });
+    // Reset insight mode when switching maps
+    setActiveInsightMode(null);
+  }, [selectedMap]);
 
   // Derived visible events based on timeline + event type filters
   const visibleEvents = useMemo(() => {
@@ -132,6 +152,8 @@ export default function Dashboard() {
           isLoading={isLoading} 
           showHeatmap={showHeatmap}
           entityVisibility={entityVisibility}
+          insightMode={activeInsightMode}
+          mapInsights={mapInsights}
         />
         <TimelineController 
           matchData={matchData} 
@@ -139,6 +161,11 @@ export default function Dashboard() {
           setCurrentTime={setCurrentTime} 
         />
       </div>
+      <MapInsightsPanel
+        insights={mapInsights}
+        activeMode={activeInsightMode}
+        setActiveMode={setActiveInsightMode}
+      />
     </div>
   );
 }
