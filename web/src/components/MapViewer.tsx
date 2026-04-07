@@ -165,10 +165,10 @@ export default function MapViewer({
 
             if (!Icon) return null;
 
-            return (
-              <div 
-                key={`${evt.type}-${idx}`}
-                className={`absolute transform -translate-x-1/2 -translate-y-1/2 ${colorCls} animate-in fade-in zoom-in duration-300`}
+              return (
+                <div 
+                  key={`${evt.player}-${evt.type}-${evt.ts}`}
+                  className={`absolute transform -translate-x-1/2 -translate-y-1/2 ${colorCls} animate-in fade-in zoom-in duration-300`}
                 style={{ left: x, top: y }}
                 title={`${evt.type} by ${evt.player} at ${evt.ts}ms`}
               >

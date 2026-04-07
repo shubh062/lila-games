@@ -96,7 +96,7 @@ export default function Dashboard() {
       // Normalize type name for filter check
       let normalizedType = e.type;
       if (e.type.includes("Kill") && !e.type.includes("Killed")) normalizedType = "Kill";
-      if (e.type.includes("Killed") && !e.type.includes("Storm")) normalizedType = "Killed";
+      if (e.type.includes("Killed")) normalizedType = "Killed";
 
       return isTimeValid && visibleEventTypes.has(normalizedType);
     });

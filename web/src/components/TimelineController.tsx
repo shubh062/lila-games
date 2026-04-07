@@ -14,7 +14,7 @@ export default function TimelineController({
   setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
 }) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [speedMultiplier, setSpeedMultiplier] = useState(1);
+  const [speedMultiplier, setSpeedMultiplier] = useState(0.2);
   const animationRef = useRef<number | null>(null);
   const lastUpdateRef = useRef<number>(0);
 
@@ -113,14 +113,14 @@ export default function TimelineController({
 
           <button 
             onClick={() => {
-              const speeds = [1, 2, 5, 10];
+              const speeds = [0.2, 0.5, 0.8, 1, 2, 5];
               const nextSpeed = speeds[(speeds.indexOf(speedMultiplier) + 1) % speeds.length];
               setSpeedMultiplier(nextSpeed);
             }}
             className="flex items-center gap-1 hover:text-white transition-colors font-medium"
           >
             <FastForward className="fill-current w-4 h-4" />
-            <span className="w-4">{speedMultiplier}x</span>
+            <span className="w-8 text-center">{speedMultiplier}x</span>
           </button>
         </div>
 
