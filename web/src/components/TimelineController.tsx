@@ -71,7 +71,7 @@ export default function TimelineController({
   const progressPct = Math.max(0, Math.min(100, ((currentTime - minTime) / (maxTime - minTime)) * 100)) || 0;
 
   return (
-    <div className="h-20 shrink-0 bg-zinc-950/80 backdrop-blur-md border-t border-zinc-800 flex flex-col justify-center px-6 fixed bottom-0 left-80 right-0 z-10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+    <div className="h-20 shrink-0 bg-zinc-950/80 backdrop-blur-md border-t border-zinc-800 flex flex-col justify-center px-6 z-10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
       
       {/* Slider */}
       <div className="relative w-full h-1.5 bg-zinc-800 rounded-full mb-3 group cursor-pointer"

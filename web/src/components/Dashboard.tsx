@@ -144,7 +144,7 @@ export default function Dashboard() {
         entityVisibility={entityVisibility}
         setEntityVisibility={setEntityVisibility}
       />
-      <div className="flex-1 flex flex-col relative bg-zinc-900 border-l border-zinc-800">
+      <div className="flex-1 flex flex-col relative bg-zinc-900 border-l border-zinc-800 min-w-0 overflow-hidden">
         <MapViewer 
           mapId={selectedMap} 
           events={visibleEvents} 

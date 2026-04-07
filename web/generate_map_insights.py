@@ -63,13 +63,16 @@ def main():
         loot_coords = []
         storm_coords = []
         traffic_coords = []
-        total_humans = set()
-        total_bots = set()
+        unique_humans = set()
+        unique_bots = set()  # from BotPosition + BotKill + BotKilled
         total_kills = 0
         total_deaths = 0
         total_storm = 0
         total_loot = 0
         pos_count = 0
+        # Sum from metadata (most reliable overall counts)
+        meta_humans_sum = 0
+        meta_bots_sum = 0
 
         for m in matches:
             fpath = os.path.join(DATA_DIR, f"{m['match_id']}.json")
@@ -80,6 +83,9 @@ def main():
                     data = json.load(f)
             except:
                 continue
+
+            meta_humans_sum += m.get('humans_count', 0)
+            meta_bots_sum += m.get('bots_count', 0)
 
             for e in data.get("events", []):
                 px, py = e.get("px", 0), e.get("py", 0)
@@ -92,21 +98,28 @@ def main():
 
                 if etype == "Position":
                     if is_human:
-                        total_humans.add(player)
+                        unique_humans.add(player)
+                    else:
+                        unique_bots.add(player)  # some bots use Position type
                     pos_count += 1
                     if pos_count % TRAFFIC_SAMPLE_RATE == 0:
                         traffic_coords.append([round(px, 1), round(py, 1)])
                 elif etype == "BotPosition":
-                    total_bots.add(player)
+                    unique_bots.add(player)
                     pos_count += 1
                     if pos_count % TRAFFIC_SAMPLE_RATE == 0:
                         traffic_coords.append([round(px, 1), round(py, 1)])
                 elif etype in ("BotKill", "Kill"):
                     kill_coords.append([round(px, 1), round(py, 1)])
                     total_kills += 1
+                    # Track bots that appear in kill events too
+                    if not is_human:
+                        unique_bots.add(player)
                 elif etype in ("BotKilled", "Killed"):
                     death_coords.append([round(px, 1), round(py, 1)])
                     total_deaths += 1
+                    if not is_human:
+                        unique_bots.add(player)
                 elif etype == "KilledByStorm":
                     storm_coords.append([round(px, 1), round(py, 1)])
                     total_storm += 1
@@ -124,8 +137,10 @@ def main():
             "map_id": map_id,
             "total_matches": len(matches),
             "summary": {
-                "humans": len(total_humans),
-                "bots": len(total_bots),
+                "unique_humans": len(unique_humans),
+                "unique_bots": len(unique_bots),
+                "total_human_sessions": meta_humans_sum,
+                "total_bot_sessions": meta_bots_sum,
                 "kills": total_kills,
                 "deaths": total_deaths,
                 "storm_deaths": total_storm,
@@ -148,7 +163,8 @@ def main():
         with open(out_path, "w") as f:
             json.dump(output, f)
 
-        print(f"  Humans: {len(total_humans)}, Bots: {len(total_bots)}")
+        print(f"  Unique humans: {len(unique_humans)}, Unique bots: {len(unique_bots)}")
+        print(f"  Human sessions (meta sum): {meta_humans_sum}, Bot sessions (meta sum): {meta_bots_sum}")
         print(f"  Kills: {total_kills}, Deaths: {total_deaths}, Storm: {total_storm}, Loot: {total_loot}")
         print(f"  Traffic samples: {len(traffic_coords)}")
         print(f"  Clusters: kills={len(kill_zones)}, deaths={len(death_zones)}, loot={len(loot_zones)}, traffic={len(traffic_zones)}")

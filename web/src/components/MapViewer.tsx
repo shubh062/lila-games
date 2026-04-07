@@ -382,7 +382,7 @@ export default function MapViewer({
         )}
 
         {/* ─── Legend Panel (bottom-left overlay) ─── */}
-        <div className="absolute bottom-20 right-2 z-10 bg-zinc-950/85 backdrop-blur-sm border border-white/10 rounded-lg px-2.5 py-2 space-y-1">
+        <div className="absolute bottom-2 right-2 z-10 bg-zinc-950/85 backdrop-blur-sm border border-white/10 rounded-lg px-2.5 py-2 space-y-1">
           <p className="text-[8px] text-zinc-500 uppercase font-bold tracking-widest mb-1.5">Legend</p>
 
           {/* Path types */}

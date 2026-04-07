@@ -9,8 +9,10 @@ export type MapInsights = {
   map_id: string;
   total_matches: number;
   summary: {
-    humans: number;
-    bots: number;
+    unique_humans: number;
+    unique_bots: number;
+    total_human_sessions: number;
+    total_bot_sessions: number;
     kills: number;
     deaths: number;
     storm_deaths: number;
@@ -105,11 +107,11 @@ export default function MapInsightsPanel({
         </p>
         <div className="grid grid-cols-3 gap-2">
           <div className="text-center">
-            <p className="text-lg font-bold text-blue-400">{s.humans}</p>
-            <p className="text-[8px] text-zinc-500 uppercase">Humans</p>
+            <p className="text-lg font-bold text-blue-400">{s.unique_humans}</p>
+            <p className="text-[8px] text-zinc-500 uppercase">Players</p>
           </div>
           <div className="text-center">
-            <p className="text-lg font-bold text-zinc-400">{s.bots}</p>
+            <p className="text-lg font-bold text-zinc-400">{s.unique_bots}</p>
             <p className="text-[8px] text-zinc-500 uppercase">Bots</p>
           </div>
           <div className="text-center">
@@ -128,6 +130,10 @@ export default function MapInsightsPanel({
             <p className="text-lg font-bold text-amber-400">{s.loot}</p>
             <p className="text-[8px] text-zinc-500 uppercase">Loot</p>
           </div>
+        </div>
+        <div className="mt-2 pt-2 border-t border-zinc-800/30 flex justify-between text-[8px] text-zinc-600">
+          <span>{s.total_human_sessions} human sessions</span>
+          <span>{s.total_bot_sessions} bot sessions</span>
         </div>
       </div>
 

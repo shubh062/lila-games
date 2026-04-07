@@ -1,0 +1,11 @@
+MATCHES: 566
+HUMAN unique (Position+is_human=True): 217
+NON-HUMAN using Position type: 1
+BOT unique (BotPosition): 50
+humans_count metadata SUM: 554
+bots_count metadata SUM: 282
+Matches with NO BotPosition events: 533
+Matches with BotKill but no BotPosition: 408
+BotKill total: 1797
+BotKilled total: 486
+Non-human Position IDs sample: ['1429']
