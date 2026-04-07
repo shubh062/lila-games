@@ -4,14 +4,14 @@ import { useMemo, useRef, useEffect } from "react";
 import { PlayerEvent } from "./Dashboard";
 import { Skull, Crosshair, Package, Zap } from "lucide-react";
 
-export default function MapViewer({ 
-  mapId, 
-  events, 
+export default function MapViewer({
+  mapId,
+  events,
   allEvents,
   isLoading,
   showHeatmap,
   entityVisibility
-}: { 
+}: {
   mapId: string;
   events: PlayerEvent[];
   allEvents: PlayerEvent[];
@@ -191,8 +191,8 @@ export default function MapViewer({
             if (evt.type === 'BotKill' || evt.type === 'Kill') {
               Icon = <Crosshair size={size} />;
               colorCls = "text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]";
-            // BotKilled = where the bot fell (victim's position) → red skull
-            // Killed = rare human-on-human death → red skull
+              // BotKilled = where the bot fell (victim's position) → red skull
+              // Killed = rare human-on-human death → red skull
             } else if (evt.type === 'BotKilled' || evt.type === 'Killed') {
               Icon = <Skull size={size} />;
               colorCls = "text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]";
@@ -260,7 +260,7 @@ export default function MapViewer({
             <Crosshair size={10} /> Kill
           </div>
           <div className="flex items-center gap-2 text-[10px] text-red-400">
-            <Skull size={10} /> Player Death
+            <Skull size={10} /> Death
           </div>
           <div className="flex items-center gap-2 text-[10px] text-fuchsia-400">
             <Zap size={10} /> Storm Death
