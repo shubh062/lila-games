@@ -34,11 +34,30 @@ To save 27MB of data streaming to the browser, I built a conversion script.
 4. Open `http://localhost:3000`
 
 ## Tech Stack
-- Frontend: Next.js (App Router), React, Tailwind CSS, Lucide React (Icons).
-- ETL Pipeline: Python, Pandas, PyArrow.
+- **Frontend**: Next.js 14 (App Router), React 18, Tailwind CSS, Lucide React.
+- **Data Engine**: Python 3.10+, Pandas, PyArrow (Off-browser ETL).
+- **Visualization**: SVG (Dynamic Paths), Canvas API (Heatmap), CSS Transitions.
 
-## Environment Variables
-*(None are strictly required for this build. If adding a full backend like Supabase later, they would go in `.env.local`)*
+## Folder Structure
+- `/player_data` - Raw Parquet source (used by ETL).
+- `/process_data.py` - The Python ETL script that groups and normalizes coordinates.
+- `/web` - The Next.js project.
+  - `/public/data` - **Optimized JSON matches** (796 matches, ~11MB total).
+  - `/public/minimaps` - 1024x1024 map textures.
+- `/ARCHITECTURE.md` - Technical deep-dive on **Coordinate Mapping** and performance.
+- `/INSIGHTS.md` - **3 Actionable Insights** found using this tool.
+- `/WALKTHROUGH.md` - A guided tour of features (Heatmaps, 100x speed, etc).
 
-## Tradeoffs & Feedback
-Please check `ARCHITECTURE.md` for a full breakdown of why I used SVGs over Canvas, and why Python data aggregation was necessary for browser stability. For a guide on how to use the interactive features, see `WALKTHROUGH.md`.
+## Deployment (Vercel)
+This tool is built for zero-config Vercel deployment.
+1. Connect your GitHub fork to Vercel.
+2. Set the **Root Directory** to `web`.
+3. Deploy. (The optimized data is already in `/web/public/data`).
+
+## Data Pipeline (Local Only)
+If you wish to re-process the raw data:
+1. `python process_data.py`
+2. This script handles the Unreal-to-Minimap coordinate math and clusters hotspots.
+
+## High-Performance Controls
+The dashboard is optimized for **speed**. Use the **Fast Preview ⚡** button to zip through any match in 3 seconds, or toggle **100x speed** for map-wide scouting.

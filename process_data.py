@@ -70,7 +70,7 @@ for date_folder in os.listdir(DATA_DIR):
                 ts_val = 0
                 if pd.notnull(row['ts']):
                     try:
-                        ts_val = int(pd.to_datetime(row['ts']).timestamp() * 1000)
+                        ts_val = int(pd.to_datetime(row['ts']).timestamp())
                     except:
                         ts_val = 0
                         
