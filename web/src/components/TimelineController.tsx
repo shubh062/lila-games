@@ -126,18 +126,17 @@ export default function TimelineController({
 
       {/* Controls */}
       <div className="flex items-center justify-between text-zinc-400 text-xs">
-        <div className="w-24 font-mono text-zinc-300 text-sm tracking-tight">
+        <div className="w-24 font-mono text-zinc-500 text-sm tracking-tight">
           <span className="text-cyan-400 font-bold">{formatTime(currentTime)}</span>
-          <span className="text-zinc-600 ml-1">/ {formatTime(maxTime)}</span>
         </div>
         
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
           <button 
             onClick={() => {
               setCurrentTime(minTime);
               setIsFastPreviewing(false);
             }}
-            className="hover:text-white transition-colors p-2"
+            className="hover:text-white transition-colors p-2 rounded-full hover:bg-zinc-800/50"
             title="Reset to Start"
           >
             <SkipBack className="fill-current w-5 h-5" />
@@ -145,14 +144,13 @@ export default function TimelineController({
 
           <button 
             onClick={startFastPreview}
-            className={`px-4 py-2 rounded-full transition-all flex items-center gap-2 ${
+            className={`px-4 py-1.5 rounded-full transition-all flex items-center gap-2 border border-zinc-800/50 ${
               isFastPreviewing 
-                ? "bg-amber-500/20 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.3)]" 
-                : "hover:bg-zinc-800 hover:text-amber-400 text-zinc-400"
+                ? "bg-amber-500/20 text-amber-400 border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.2)]" 
+                : "bg-zinc-900/40 text-zinc-400 hover:text-amber-400 hover:bg-zinc-800"
             }`}
-            title="Fast Preview (3s Overview)"
           >
-            <Zap className={`w-4 h-4 ${isFastPreviewing ? 'fill-current animate-pulse' : ''}`} />
+            <Zap className={`w-3.5 h-3.5 ${isFastPreviewing ? 'fill-current animate-pulse' : ''}`} />
             <span className="font-bold uppercase tracking-wider text-[10px]">Fast Preview</span>
           </button>
           
@@ -161,9 +159,9 @@ export default function TimelineController({
               setIsPlaying(!isPlaying);
               setIsFastPreviewing(false);
             }}
-            className="w-12 h-12 rounded-full bg-zinc-100 text-zinc-900 flex items-center justify-center hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+            className="w-11 h-11 rounded-full bg-zinc-100 text-zinc-900 flex items-center justify-center hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] mx-2"
           >
-            {isPlaying && !isFastPreviewing ? <Pause className="fill-current w-6 h-6" /> : <Play className="fill-current w-6 h-6 ml-1" />}
+            {isPlaying && !isFastPreviewing ? <Pause className="fill-current w-5 h-5" /> : <Play className="fill-current w-5 h-5 ml-1" />}
           </button>
 
           <button 
@@ -173,19 +171,16 @@ export default function TimelineController({
               const nextIndex = (speeds.indexOf(speedMultiplier) + 1) % speeds.length;
               setSpeedMultiplier(speeds[nextIndex]);
             }}
-            className="flex flex-col items-center hover:text-white transition-colors font-medium border border-zinc-800 rounded px-3 py-1 bg-zinc-900/50 min-w-[56px]"
+            className="flex items-center gap-2 transition-all font-medium border border-zinc-800/50 rounded-full px-4 py-1.5 bg-zinc-900/40 text-zinc-400 hover:text-white hover:bg-zinc-800 min-w-[65px] justify-center"
           >
-            <span className="text-[10px] text-zinc-500 uppercase leading-none mb-1 font-bold">Speed</span>
-            <div className="flex items-center gap-1 group">
-              <FastForward className="w-3 h-3 text-cyan-400" />
-              <span className="text-sm">{speedMultiplier}x</span>
-            </div>
+            <FastForward className="w-3.5 h-3.5 text-cyan-500" />
+            <span className="text-xs font-bold">{speedMultiplier}x</span>
           </button>
         </div>
 
         <div className="w-24 text-right">
-          <div className="text-[10px] text-zinc-600 uppercase font-bold tracking-widest mb-0.5">Duration</div>
-          <div className="font-mono text-zinc-400">{formatTime(maxTime)}</div>
+          <div className="text-[9px] text-zinc-600 uppercase font-black tracking-[0.2em] mb-0.5">Duration</div>
+          <div className="font-mono text-zinc-400 text-xs">{formatTime(maxTime)}</div>
         </div>
       </div>
     </div>
