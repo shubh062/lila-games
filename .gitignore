@@ -1,4 +1,24 @@
-player_data
-processed_data
-web/node_modules
-.next
+# Raw Data & Source Archives (Too heavy for GitHub)
+player_data/
+player_data.zip
+"Lila APM Written Test.pdf"
+
+# Temporary Build/ETL Artifacts
+processed_data/
+web/.next/
+web/node_modules/
+web/out/
+web/build/
+.DS_Store
+*.log
+.env*
+
+# Documentation References (Internal)
+.gemini/
+.agents/
+.agent/
+.vscode/
+
+# VALUABLES (DO NOT IGNORE)
+# web/public/data/ is NOT ignored to ensure Vercel has match data
+# ARCHITECTURE.md, INSIGHTS.md, WALKTHROUGH.md are the primary deliverables

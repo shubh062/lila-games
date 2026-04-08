@@ -9,13 +9,19 @@ This repository contains my submission for the LILA Games APM Written Test. It i
 - **Bot vs. Human Distinctions**: Solid glowing paths for Humans, subtle dashed lines for Bots.
 - **Discrete Event Overlays**: Visual markers for `Kill`, `Death`, `KilledByStorm`, and `Loot`.
 
+## Tech Stack
+- **Frontend**: Next.js 14 (App Router), React 18, Tailwind CSS, Lucide React.
+- **Data Engine**: Python 3.10+, Pandas, PyArrow (Off-browser ETL).
+- **Visualization**: SVG (Dynamic Paths), Canvas API (Heatmap), CSS Transitions.
+
 ## Folder Structure
-- `/player_data` - The raw Parquet files (not included in repo) and Minimap images.
-- `/process_data.py` - The Python ETL script.
-- `/web` - The Next.js web application frontend.
-- `/ARCHITECTURE.md` - Technical summary of system design and coordinate mappings.
-- `/INSIGHTS.md` - Three data-driven observations with evidence and match IDs.
-- `/WALKTHROUGH.md` - Feature guide for Level Designers.
+- `/process_data.py` - The Python ETL script for coordinate normalisation.
+- `/web` - The Next.js project directory.
+  - `/public/data` - **Optimized JSON matches** (796 matches, ~11MB total).
+  - `/public/minimaps` - 1024x1024 map textures.
+- `/ARCHITECTURE.md` - Technical deep-dive on **Coordinate Mapping** and performance.
+- `/INSIGHTS.md` - **3 Actionable Insights** found using this tool.
+- `/WALKTHROUGH.md` - A guided tour of features (Heatmaps, 100x speed, etc).
 
 ## Setup & Local Development
 
@@ -32,21 +38,6 @@ To save 27MB of data streaming to the browser, I built a conversion script.
 2. `npm install`
 3. `npm run dev`
 4. Open `http://localhost:3000`
-
-## Tech Stack
-- **Frontend**: Next.js 14 (App Router), React 18, Tailwind CSS, Lucide React.
-- **Data Engine**: Python 3.10+, Pandas, PyArrow (Off-browser ETL).
-- **Visualization**: SVG (Dynamic Paths), Canvas API (Heatmap), CSS Transitions.
-
-## Folder Structure
-- `/player_data` - Raw Parquet source (used by ETL).
-- `/process_data.py` - The Python ETL script that groups and normalizes coordinates.
-- `/web` - The Next.js project.
-  - `/public/data` - **Optimized JSON matches** (796 matches, ~11MB total).
-  - `/public/minimaps` - 1024x1024 map textures.
-- `/ARCHITECTURE.md` - Technical deep-dive on **Coordinate Mapping** and performance.
-- `/INSIGHTS.md` - **3 Actionable Insights** found using this tool.
-- `/WALKTHROUGH.md` - A guided tour of features (Heatmaps, 100x speed, etc).
 
 ## Deployment (Vercel)
 This tool is built for zero-config Vercel deployment.
