@@ -269,9 +269,9 @@ export default function MapViewer({
                 key={playerId}
                 points={pointsStr}
                 fill="none"
-                stroke={data.isHuman ? "rgba(59, 130, 246, 0.6)" : "rgba(156, 163, 175, 0.3)"}
-                strokeWidth={data.isHuman ? 3 : 1.5}
-                strokeDasharray={data.isHuman ? "none" : "4 4"}
+                stroke={data.isHuman ? "rgba(59, 130, 246, 0.6)" : "rgba(228, 228, 231, 0.55)"}
+                strokeWidth={data.isHuman ? 3 : 2}
+                strokeDasharray={data.isHuman ? "none" : "6 4"}
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 className={`pointer-events-auto cursor-help ${data.isHuman ? "drop-shadow-[0_0_2px_#3b82f6]" : ""}`}
@@ -291,13 +291,13 @@ export default function MapViewer({
                   cx={last.x}
                   cy={last.y}
                   r={data.isHuman ? 6 : 4}
-                  fill={data.isHuman ? "#60a5fa" : "#d1d5db"}
+                  fill={data.isHuman ? "#60a5fa" : "#e4e4e7"}
                   className={data.isHuman ? "drop-shadow-[0_0_6px_#60a5fa]" : ""}
                 />
                 <text
                   x={last.x + 8}
                   y={last.y + 4}
-                  fill={data.isHuman ? "#93c5fd" : "#9ca3af"}
+                  fill={data.isHuman ? "#93c5fd" : "#d4d4d8"}
                   fontSize="10"
                   fontFamily="monospace"
                   fontWeight="bold"
@@ -390,8 +390,8 @@ export default function MapViewer({
             <svg width="20" height="6"><line x1="0" y1="3" x2="20" y2="3" stroke="#60a5fa" strokeWidth="2" /></svg>
             Human Player (H)
           </div>
-          <div className="flex items-center gap-2 text-[10px] text-zinc-400">
-            <svg width="20" height="6"><line x1="0" y1="3" x2="20" y2="3" stroke="#9ca3af" strokeWidth="1.5" strokeDasharray="3 2" /></svg>
+          <div className="flex items-center gap-2 text-[10px] text-zinc-200">
+            <svg width="20" height="6"><line x1="0" y1="3" x2="20" y2="3" stroke="#e4e4e7" strokeWidth="2" strokeDasharray="6 4" /></svg>
             Bot / AI (B)
           </div>
 
