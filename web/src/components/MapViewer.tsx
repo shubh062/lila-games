@@ -319,18 +319,23 @@ export default function MapViewer({
             let colorCls = "";
             const size = 16;
 
+            const isHumanFatality = evt.is_human && (evt.type === 'BotKilled' || evt.type === 'Killed' || evt.type === 'KilledByStorm');
+            
             if (evt.type === 'BotKill' || evt.type === 'Kill') {
-              Icon = <Crosshair size={size} />;
+              Icon = <Crosshair size={isHumanFatality ? 18 : size} />;
               colorCls = "text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]";
             } else if (evt.type === 'BotKilled' || evt.type === 'Killed') {
-              Icon = <Skull size={size} />;
-              colorCls = "text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]";
+              Icon = <Skull size={isHumanFatality ? 22 : size} />;
+              colorCls = isHumanFatality 
+                ? "text-red-500 drop-shadow-[0_0_12px_rgba(239,68,68,1)] animate-pulse" 
+                : "text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.7)]";
             } else if (evt.type === 'Loot') {
               Icon = <Package size={14} />;
               colorCls = "text-amber-400 drop-shadow-[0_0_5px_rgba(251,191,36,0.6)]";
             } else if (evt.type === 'KilledByStorm') {
-              Icon = <Zap size={size} />;
+              Icon = <Zap size={isHumanFatality ? 20 : size} />;
               colorCls = "text-fuchsia-500 drop-shadow-[0_0_10px_rgba(217,70,239,1)]";
+              if (isHumanFatality) colorCls += " animate-pulse";
             }
 
             if (!Icon) return null;
@@ -338,11 +343,14 @@ export default function MapViewer({
             return (
               <div
                 key={`${evt.player}-${evt.type}-${evt.ts}`}
-                className={`absolute transform -translate-x-1/2 -translate-y-1/2 ${colorCls} animate-in fade-in zoom-in duration-300`}
+                className={`absolute transform -translate-x-1/2 -translate-y-1/2 ${colorCls} animate-in fade-in zoom-in duration-300 z-10`}
                 style={{ left: x, top: y }}
                 title={`${evt.type} · ${evt.player.slice(0, 8)}... · ${Math.floor((evt.ts) / 1000)}s`}
               >
                 {Icon}
+                {isHumanFatality && (
+                  <div className="absolute inset-0 rounded-full border-2 border-red-500/50 animate-ping scale-150" />
+                )}
               </div>
             );
           })}

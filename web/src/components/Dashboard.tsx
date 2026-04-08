@@ -109,21 +109,25 @@ export default function Dashboard() {
     if (!matchData) return [];
     const TRAIL_MS = 120000;
     return matchData.events.filter(e => {
-      const isTimeValid = e.ts <= currentTime && e.ts >= currentTime - TRAIL_MS;
-      // Position events always pass through (filtered by entityVisibility in MapViewer)
-      if (e.type === 'Position' || e.type === 'BotPosition') return isTimeValid;
+      // Position events always follow the trail
+      if (e.type === 'Position' || e.type === 'BotPosition') {
+        return e.ts <= currentTime && e.ts >= currentTime - TRAIL_MS;
+      }
       
       // Map real event types to filter category IDs
-      // BotKill = shooter's position (green crosshair = a kill happened)
-      // BotKilled = victim's position (red skull = where a bot fell)
-      // Kill / Killed = rare human-on-human events
-      // KilledByStorm = independent storm category
       let normalizedType = e.type;
       if (e.type === 'BotKill' || e.type === 'Kill') normalizedType = 'Kill';
       else if (e.type === 'BotKilled' || e.type === 'Killed') normalizedType = 'Killed';
-      // KilledByStorm and Loot stay as-is
+      
+      const isVisible = visibleEventTypes.has(normalizedType);
+      if (!isVisible) return false;
 
-      return isTimeValid && visibleEventTypes.has(normalizedType);
+      // Persistence logic:
+      // Human fatalities (Killed/BotKilled where is_human is true) should linger much longer
+      const isHumanFatality = e.is_human && (e.type === 'Killed' || e.type === 'BotKilled' || e.type === 'KilledByStorm');
+      const persistenceMs = isHumanFatality ? 600000 : TRAIL_MS; // 10 minutes vs 2 minutes
+      
+      return e.ts <= currentTime && e.ts >= currentTime - persistenceMs;
     });
   }, [matchData, currentTime, visibleEventTypes]);
 

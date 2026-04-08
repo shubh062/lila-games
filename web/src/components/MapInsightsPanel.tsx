@@ -33,7 +33,7 @@ export type MapInsights = {
 
 const INSIGHT_MODES: { id: InsightMode; label: string; Icon: React.ElementType; color: string; bg: string; border: string; description: string }[] = [
   { id: 'kills', label: 'Kill Zones', Icon: Crosshair, color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/40', description: 'Where kills happen most across all matches' },
-  { id: 'deaths', label: 'Death Zones', Icon: Skull, color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/40', description: 'Where bots die most frequently' },
+  { id: 'deaths', label: 'Death Zones', Icon: Skull, color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/40', description: 'Fatalities and bot deaths found across all matches' },
   { id: 'loot', label: 'Loot Density', Icon: Package, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/40', description: 'Where players pick up loot' },
   { id: 'traffic', label: 'High Traffic', Icon: MapPin, color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/40', description: 'Most traversed paths and zones' },
   { id: 'storm', label: 'Storm Deaths', Icon: Zap, color: 'text-fuchsia-400', bg: 'bg-fuchsia-500/10', border: 'border-fuchsia-500/40', description: 'Where storm caught players' },
