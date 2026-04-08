@@ -74,7 +74,16 @@ export default function Dashboard() {
 
   // Load match data when selection changes
   useEffect(() => {
-    if (!selectedMatchId) return;
+    if (!selectedMatchId) {
+      setMatchData(null);
+      setCurrentTime(0);
+      return;
+    }
+    
+    // Clear old match state immediately to prevent "ghosting" while loading
+    setMatchData(null);
+    setCurrentTime(0);
+    
     setIsLoading(true);
     fetch(`/data/${selectedMatchId}.json`)
       .then((res) => res.json())
@@ -93,6 +102,11 @@ export default function Dashboard() {
 
   // Load map insights when selected map changes
   useEffect(() => {
+    // Reset selected match when switching maps to prevent telemetry "ghosting"
+    setSelectedMatchId(null);
+    setMatchData(null);
+    setCurrentTime(0);
+
     fetch(`/data/map_insights_${selectedMap}.json`)
       .then((res) => res.json())
       .then((data) => setMapInsights(data))
@@ -150,9 +164,12 @@ export default function Dashboard() {
       />
       <div className="flex-1 flex flex-col relative bg-zinc-900 border-l border-zinc-800 min-w-0 overflow-hidden">
         <MapViewer 
+          key={selectedMatchId}
+          matchId={selectedMatchId || 'none'}
           mapId={selectedMap} 
           events={visibleEvents} 
           allEvents={matchData?.events || []}
+          visibleEventTypes={visibleEventTypes}
           isLoading={isLoading} 
           showHeatmap={showHeatmap}
           entityVisibility={entityVisibility}

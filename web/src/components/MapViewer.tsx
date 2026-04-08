@@ -6,18 +6,22 @@ import { InsightMode, MapInsights } from "./MapInsightsPanel";
 import { Skull, Crosshair, Package, Zap } from "lucide-react";
 
 export default function MapViewer({
+  matchId,
   mapId,
   events,
   allEvents,
+  visibleEventTypes,
   isLoading,
   showHeatmap,
   entityVisibility,
   insightMode,
   mapInsights
 }: {
+  matchId: string;
   mapId: string;
   events: PlayerEvent[];
   allEvents: PlayerEvent[];
+  visibleEventTypes: Set<string>;
   isLoading: boolean;
   showHeatmap: boolean;
   entityVisibility: 'all' | 'humans' | 'bots';
@@ -81,10 +85,16 @@ export default function MapViewer({
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (!showHeatmap) return;
 
-    const combatEvents = allEvents.filter(e =>
-      (e.type === 'BotKill' || e.type === 'Kill' || e.type === 'BotKilled' || e.type === 'Killed') &&
-      !(e.px === 0 && e.py === 0)
-    );
+    const combatEvents = allEvents.filter(e => {
+      // Basic type match
+      const typeMatch = (e.type === 'BotKill' || e.type === 'Kill' || e.type === 'BotKilled' || e.type === 'Killed');
+      if (!typeMatch || (e.px === 0 && e.py === 0)) return false;
+
+      // Filter by global visibility
+      if (e.type === 'BotKill' || e.type === 'Kill') return visibleEventTypes.has('Kill');
+      if (e.type === 'BotKilled' || e.type === 'Killed') return visibleEventTypes.has('Killed');
+      return true;
+    });
 
     combatEvents.forEach(evt => {
       const isKill = evt.type === 'BotKill' || evt.type === 'Kill';
@@ -99,7 +109,7 @@ export default function MapViewer({
       ctx.fillStyle = gradient;
       ctx.fillRect(evt.px - 20, evt.py - 20, 40, 40);
     });
-  }, [allEvents, showHeatmap]);
+  }, [allEvents, showHeatmap, visibleEventTypes]);
 
   // ─── Aggregate Insight Overlay Canvas ───
   useEffect(() => {
@@ -110,6 +120,15 @@ export default function MapViewer({
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (!insightMode || !mapInsights) return;
+
+    // Check if the current insight type is visible via sidebar toggles
+    const isVisible = (insightMode === 'kills' && visibleEventTypes.has('Kill')) ||
+                     (insightMode === 'deaths' && visibleEventTypes.has('Killed')) ||
+                     (insightMode === 'loot' && visibleEventTypes.has('Loot')) ||
+                     (insightMode === 'storm' && visibleEventTypes.has('KilledByStorm')) ||
+                     (insightMode === 'traffic'); // Traffic is always visible if selected
+
+    if (!isVisible) return;
 
     // Pick coords + colour based on mode
     let coords: number[][] = [];
@@ -159,11 +178,18 @@ export default function MapViewer({
 
     // Store blur for CSS
     canvas.style.filter = `blur(${blurAmount}px) saturate(2)`;
-  }, [insightMode, mapInsights]);
+  }, [insightMode, mapInsights, visibleEventTypes]);
 
   // Get insight clusters for SVG zone rings
   const insightClusters = useMemo(() => {
-    if (!insightMode || !mapInsights) return [];
+    const isVisible = (insightMode === 'kills' && visibleEventTypes.has('Kill')) ||
+                     (insightMode === 'deaths' && visibleEventTypes.has('Killed')) ||
+                     (insightMode === 'loot' && visibleEventTypes.has('Loot')) ||
+                     (insightMode === 'storm' && visibleEventTypes.has('KilledByStorm')) ||
+                     (insightMode === 'traffic');
+
+    if (!isVisible || !mapInsights) return [];
+
     switch (insightMode) {
       case 'kills': return mapInsights.clusters.kill_zones;
       case 'deaths': return mapInsights.clusters.death_zones;
@@ -172,7 +198,7 @@ export default function MapViewer({
       case 'storm': return mapInsights.storm_coords.map(c => ({ cx: c[0], cy: c[1], count: 1, radius: 20 }));
       default: return [];
     }
-  }, [insightMode, mapInsights]);
+  }, [insightMode, mapInsights, visibleEventTypes]);
 
   const insightColor = useMemo(() => {
     switch (insightMode) {
@@ -342,7 +368,7 @@ export default function MapViewer({
 
             return (
               <div
-                key={`${evt.player}-${evt.type}-${evt.ts}`}
+                key={`${matchId}-${evt.player}-${evt.type}-${evt.ts}`}
                 className={`absolute transform -translate-x-1/2 -translate-y-1/2 ${colorCls} animate-in fade-in zoom-in duration-300 z-10`}
                 style={{ left: x, top: y }}
                 title={`${evt.type} · ${evt.player.slice(0, 8)}... · ${Math.floor((evt.ts) / 1000)}s`}
