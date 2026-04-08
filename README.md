@@ -1,5 +1,5 @@
 # LILA BLACK - Player Journey Visualization Tool
-# Deployed URL: https://github.com/shubh062/lila-games
+# Deployed URL: https://lila-games-bay.vercel.app/
 
 
 This repository contains my submission for the LILA Games APM Written Test. It is a full-stack data visualization tool designed specifically for Level Designers.
