@@ -42,7 +42,7 @@ export default function TimelineController({
 
       setCurrentTime((prev) => {
         // Assume baseline 1x speed is realistic time. E.g. x times actual delta
-        const nextTime = prev + (deltaMs * speedMultiplier * 10); // 10x base speed for UX
+        const nextTime = prev + (deltaMs * speedMultiplier); // 1x = real-time
         if (nextTime >= maxTime) {
           setIsPlaying(false);
           return maxTime;
